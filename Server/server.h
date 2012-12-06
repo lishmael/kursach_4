@@ -14,30 +14,30 @@
 
 class Server : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 private:
-    QTcpServer* ptcpServer;
-    QTcpServer* localServer;
-    QTextEdit* ptxt;
-    quint16 NextBlockSize;
-    void sendToClient(QTcpSocket* pSocket, QString& str);
-    QMap <QString, QTcpSocket*> clients;
-    int nPort, localPort;
-    bool startServer();
-public:
-    //explicit Server(QWidget *parent = 0);
-    Server();
-    Server(int nPort, QWidget *pwgt = 0);
-    ~Server();
-public slots:
-    virtual void slotNewConnection();
-    void slotReadClient();
-    void slot_set_port(int);
-    QList<QString> slot_getClients();
+	QTcpServer* externalServer;
+	QTcpServer* localServer;
+	quint16 NextBlockSize;
+	int externalPort, localPort;
+	QList<QTcpSocket*> socketsConnected;
 
+	bool startServer();
+	void sendToClient(QTcpSocket* pSocket, QString& str);
+public:
+
+	Server();
+	//Server(int externalPort, QWidget *pwgt = 0);
+	~Server();
+public slots:
+	virtual void slotNewConnection();
+	void slotReadClient();
+	void slot_startServer(int externalPort, int localPort);
+	void slot_stopServer();
 signals:
-    void signal_startServerError(QString);
-    void signal_display(QString);
+	void signal_startServerError(QString);
+	void signal_display(QString);
+	void signal_serverStaus(bool isOnline);
 };
 
 #endif // SERVER_H

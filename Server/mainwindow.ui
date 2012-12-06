@@ -6,103 +6,109 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>482</width>
-    <height>339</height>
+    <width>541</width>
+    <height>407</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Server Controller v1.0b</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLineEdit" name="InputPort">
+   <widget class="QPushButton" name="buttonRun">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>270</x>
       <y>10</y>
-      <width>141</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>340</x>
-      <y>10</y>
-      <width>131</width>
-      <height>23</height>
+      <width>71</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="text">
-     <string>Запустити сервер</string>
+     <string>Запуск</string>
     </property>
    </widget>
-   <widget class="QTextBrowser" name="server_messenger">
+   <widget class="QTextBrowser" name="logArea">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>90</y>
+      <width>521</width>
+      <height>291</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="inputIntPort">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>40</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="inputExtPort">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>10</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonStop">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>10</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Зупинка</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="buttonRestart">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>10</y>
+      <width>101</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Перезапуск</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelExternalPort">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Зовнішній порт:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelInternalPort">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>40</y>
-      <width>461</width>
-      <height>192</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>161</width>
-      <height>16</height>
+      <width>141</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Вкажіть № порта для сервера:</string>
+     <string>Внутрішній порт:</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="clientMessenger">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>240</y>
-      <width>281</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="sendToClient">
-    <property name="geometry">
-     <rect>
-      <x>340</x>
-      <y>270</y>
-      <width>131</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Надіслати</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="clientList">
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>240</y>
-      <width>171</width>
-      <height>21</height>
-     </rect>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>482</width>
-     <height>20</height>
-    </rect>
-   </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

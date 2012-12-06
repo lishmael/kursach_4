@@ -4,32 +4,34 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QTextEdit>
-
+#include <QFile>
 namespace Ui {
 class MainWindow;
 }
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
-    
+	Q_OBJECT
+
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
-    
-private slots:
-    void on_pushButton_clicked();
-    void on_clientList_activated(const QString &arg1);
-
-public slots:
-    void slot_serverMessenger(QString disp);
-
-signals:
-    void port_set(int);
-    void signal_getClientList();
-
+	explicit MainWindow(QWidget *parent = 0);
+	~MainWindow();
 private:
-    Ui::MainWindow *ui;
+		Ui::MainWindow *ui;
+		QFile* fileHandler;
+private slots:
+		void on_buttonRun_clicked();
+		void on_buttonStop_clicked();
+
+		void on_buttonRestart_clicked();
+
+	public slots:
+	void slot_serverMessenger(QString disp);
+	void slot_serverStarted(bool isStarted);
+signals:
+	void signal_startServer(int external, int internal);
+	void signal_stopServer();
+
 };
 
 #endif // MAINWINDOW_H
