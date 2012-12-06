@@ -22,7 +22,6 @@
 }*/
 Server::Server(): NextBlockSize(0)
 {
-
 	localServer = new QTcpServer(this);
 	externalServer = new QTcpServer(this);
 	connect(externalServer, SIGNAL(newConnection()), this, SLOT(slotNewConnection()));
@@ -36,6 +35,12 @@ void Server::sendToClient(QTcpSocket* pSocket, QString& str)
 	out.device()->seek(0);
 	out << quint16(arrBlock.size() - sizeof(quint16));
 	pSocket->write(arrBlock);
+    QTime time;
+    QString strMessage = time.currentTime().toString() + " " + "Server has sent to the " +
+                            pSocket->peerAddress().toString() + "\n" +
+                            QString::number(arrBlock.size() - sizeof(quint16)) +
+                            " bytes of data. Data is: " + str;
+    emit signal_display(strMessage);
 }
 
 bool Server::startServer()
@@ -142,7 +147,6 @@ void Server::slotReadClient()
 						 QString::number(totalDataRecived) +
 						 " bytes. Data is: " + buffer;
 	emit signal_display(strMessage);
-
 }
 void Server::slot_startServer(int externalPort, int localPort)
 {

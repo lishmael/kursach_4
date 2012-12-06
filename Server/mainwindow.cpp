@@ -9,36 +9,35 @@ MainWindow::MainWindow(QWidget *parent) :
 	QLineEdit* to1 = centralWidget()->findChild<QLineEdit*>("inputExtPort");
 	QLineEdit* to2 = centralWidget()->findChild<QLineEdit*>("inputIntPort");
 	QWidget::setTabOrder(to1, to2);
-	to1->setFocus();
+    to1->setFocus();
+//	fileHandler = new QFile("server.conf");
+//	if (fileHandler->open(QFile::ReadOnly))
+//	{
+//		char buffer[64];
+//		QString line;
+//		while (fileHandler->readLine(buffer, sizeof(buffer)) != -1)
+//		{
+//			line = QString(buffer);
+//			if (line[0] == '#')
+//				continue;
+//			else if (line[0] == '@')
+//				if (line.indexOf("LocalPort") != -1)
+//				{
+//					line = line.rightRef(line.indexOf("LocalPort") +
+//										 "LocalPort".count());
+//				}
+//				else if (line.indexOf("ExternalPort") != -1)
+//				{
+//					line = line.rightRef(line.indexOf("ExternalPort") +
+//										 "ExternalPort".count());
+//				}
+//			else
+//				{
+//					continue;
+//				}
+//		}
 
-	fileHandler = new QFile("server.conf");
-	if (fileHandler->open(QFile::ReadOnly))
-	{
-		char buffer[64];
-		QString line;
-		while (fileHandler->readLine(buffer, sizeof(buffer)) != -1)
-		{
-			line = QString(buffer);
-			if (line[0] == '#')
-				continue;
-			else if (line[0] == '@')
-				if (line.indexOf("LocalPort") != -1)
-				{
-					line = line.rightRef(line.indexOf("LocalPort") +
-										 "LocalPort".count());
-				}
-				else if (line.indexOf("ExternalPort") != -1)
-				{
-					line = line.rightRef(line.indexOf("ExternalPort") +
-										 "ExternalPort".count());
-				}
-			else
-				{
-					continue;
-				}
-		}
-
-	}
+//	}
 }
 
 MainWindow::~MainWindow()
@@ -74,6 +73,15 @@ void MainWindow::slot_serverStarted(bool isStarted)
 
 void MainWindow::on_buttonRun_clicked()
 {
+    QRegExp tocheck("[^0-9]");
+    if (centralWidget()->findChild<QLineEdit*>(QString("inputExtPort"))->text().contains(tocheck) || centralWidget()->findChild<QLineEdit*>(QString("inputIntPort"))->text().contains(tocheck) ||
+            centralWidget()->findChild<QLineEdit*>(QString("inputExtPort"))->text().length()!=4 || centralWidget()->findChild<QLineEdit*>(QString("inputIntPort"))->text().length()!=4)
+    {
+        QMessageBox::critical(0, "Invalid number of port(s)", "Port can only be a whole four significant number", QMessageBox::Ok, 0);
+        centralWidget()->findChild<QLineEdit*>(QString("inputExtPort"))->clear();
+        centralWidget()->findChild<QLineEdit*>(QString("inputIntPort"))->clear();
+        return;
+    }
 	int extPort = centralWidget()->findChild<QLineEdit*>(QString("inputExtPort"))->text().toInt();
 	int intPort = centralWidget()->findChild<QLineEdit*>(QString("inputIntPort"))->text().toInt();
 	emit signal_startServer(extPort, intPort);
