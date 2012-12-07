@@ -1,25 +1,5 @@
 #include "server.h"
 
-/*Server::Server (int nPort, QWidget* pwgt) :
-	QWidget(pwgt), NextBlockSize(0)
-{
-	this->externalPort = nPort;
-	ptcpServer = new QTcpServer(this);
-	if (!ptcpServer->listen(QHostAddress::Any, nPort))
-	{
-		QMessageBox::critical(0, "Server Error", "Unable to start the server:" + ptcpServer->errorString());
-		ptcpServer->close();
-		return;
-	}
-	connect(ptcpServer, SIGNAL(newConnection()), this, SLOT(slotNewConnection()));
-	ptxt = new QTextEdit;
-	ptxt->setReadOnly(true);
-	//Layout setup
-	QVBoxLayout* pvbxLayout = new QVBoxLayout;
-	pvbxLayout->addWidget(new QLabel("<H1>Server</H1>"));
-	pvbxLayout->addWidget(ptxt);
-	setLayout(pvbxLayout);
-}*/
 Server::Server(): NextBlockSize(0)
 {
 	localServer = new QTcpServer(this);
@@ -30,17 +10,17 @@ void Server::sendToClient(QTcpSocket* pSocket, QString& str)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	//out.setVersion(QDataStream::Qt_4_8);
 	out << quint16(0) << QTime::currentTime() << str;
 	out.device()->seek(0);
 	out << quint16(arrBlock.size() - sizeof(quint16));
 	pSocket->write(arrBlock);
-    QTime time;
-    QString strMessage = time.currentTime().toString() + " " + "Server has sent to the " +
-                            pSocket->peerAddress().toString() + "\n" +
-                            QString::number(arrBlock.size() - sizeof(quint16)) +
-                            " bytes of data. Data is: " + str;
-    emit signal_display(strMessage);
+	QTime time;
+	QString strMessage = time.currentTime().toString() +
+						 " Server has sent to the " +
+						 pSocket->peerAddress().toString() + "\n" +
+						 QString::number(arrBlock.size() - sizeof(quint16)) +
+						 " bytes of data. Data is: " + str;
+	emit signal_display(strMessage);
 }
 
 bool Server::startServer()
@@ -49,7 +29,8 @@ bool Server::startServer()
 	if (!externalServer->listen(QHostAddress::LocalHost, externalPort))
 	{
 		externalServer->close();
-		emit signal_startServerError(externalServer->errorString());
+		emit signal_startServerError("Local server starting error: " +
+									 externalServer->errorString());
 		return false;
 	}
 
@@ -61,7 +42,9 @@ bool Server::startServer()
 	if (!localServer->listen(QHostAddress::LocalHost, localPort))
 	{
 		localServer->close();
-		emit signal_startServerError(localServer->errorString());
+		externalServer->close();
+		emit signal_startServerError("Local server starting error: " +
+									 localServer->errorString());
 		return false;
 	}
 	emit signal_display(QString("Internal server is ready at ") +
@@ -90,32 +73,6 @@ void Server::slotNewConnection()
 	}
 	sendToClient(pClientSocket, sResponse);
 }
-/*void Server::slotReadClient()
-{
-	QTcpSocket* pClientSocket = (QTcpSocket*)sender();
-	QDataStream in(pClientSocket);
-
-	while (true)
-	{
-		if (!NextBlockSize)
-		{
-			if (pClientSocket->bytesAvailable() < sizeof(quint16))
-				break;
-			in >> NextBlockSize;
-		}
-		if (pClientSocket->bytesAvailable() < NextBlockSize)
-			break;
-		QTime time;
-		QString str;
-		in >> time >> str;
-		QString strMessage = time.toString() + " " + "Client has sent - " + str;
-		emit signal_display(strMessage);
-		NextBlockSize = 0;
-		str = "Server Response: Recived " + str + "/";
-		QString *pstr = &str;
-		sendToClient(pClientSocket, *pstr);
-	}
-}*/
 
 void Server::slotReadClient()
 {

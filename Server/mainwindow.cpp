@@ -9,35 +9,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	QLineEdit* to1 = centralWidget()->findChild<QLineEdit*>("inputExtPort");
 	QLineEdit* to2 = centralWidget()->findChild<QLineEdit*>("inputIntPort");
 	QWidget::setTabOrder(to1, to2);
-    to1->setFocus();
-//	fileHandler = new QFile("server.conf");
-//	if (fileHandler->open(QFile::ReadOnly))
-//	{
-//		char buffer[64];
-//		QString line;
-//		while (fileHandler->readLine(buffer, sizeof(buffer)) != -1)
-//		{
-//			line = QString(buffer);
-//			if (line[0] == '#')
-//				continue;
-//			else if (line[0] == '@')
-//				if (line.indexOf("LocalPort") != -1)
-//				{
-//					line = line.rightRef(line.indexOf("LocalPort") +
-//										 "LocalPort".count());
-//				}
-//				else if (line.indexOf("ExternalPort") != -1)
-//				{
-//					line = line.rightRef(line.indexOf("ExternalPort") +
-//										 "ExternalPort".count());
-//				}
-//			else
-//				{
-//					continue;
-//				}
-//		}
-
-//	}
+	to1->setFocus();
+	loadConfig();
 }
 
 MainWindow::~MainWindow()
@@ -45,18 +18,106 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
+void MainWindow::loadConfig()
+{
+	fileHandler = new QFile("server.conf");
+	if (fileHandler->open(QFile::ReadOnly))
+	{
+		char buffer[64];
+		QString line;
+		intPort = -1;
+		extPort = -1;
+		while (fileHandler->readLine(buffer, sizeof(buffer)) != -1)
+		{
+			line = QString(buffer);
+			QStringList inputRow = line.split(" ", QString::SkipEmptyParts);
+			if (inputRow[0] == "@LocalPort")
+			{
+				intPort = inputRow[1].toInt();
+			}
+			else if (inputRow[0] == "@ExternalPort")
+			{
+				extPort = inputRow[1].toInt();
+			}
+			else
+			{
+				continue;
+			}
+		}
+		QLineEdit * inputText = centralWidget()->findChild<QLineEdit*>("inputIntPort");
+		inputText->setText(QString::number(intPort));
+		inputText = centralWidget()->findChild<QLineEdit*>("inputExtPort");
+		inputText->setText(QString::number(extPort));
+		fileHandler->close();
+	}
+	delete fileHandler;
+}
+
+void MainWindow::writeConfig()
+{
+	QString endl = "\n\r";
+	#ifndef Q_WS_WIN
+	endl = "\n";
+	#endif
+	fileHandler = new QFile("server.conf");
+	if (fileHandler->open(QFile::WriteOnly | QFile::Truncate))
+	{
+		fileHandler->write(QString("#Server configuration file" + endl).toStdString().c_str());
+		fileHandler->write(QString("@LocalPort " + QString::number(intPort) + endl).toStdString().c_str());
+		fileHandler->write(QString("@ExternalPort " + QString::number(extPort) + endl).toStdString().c_str());
+		fileHandler->close();
+	}
+	else
+	{
+		QMessageBox::warning(this, "I/O error", "Cannot write server.config file!",
+							 QMessageBox::Ok, 0);
+	}
+	delete fileHandler;
+	fileHandler = new QFile("client.conf");
+	if (fileHandler->open(QFile::WriteOnly | QFile::Truncate))
+	{
+		fileHandler->write(QString("#Client configuration file" + endl).toStdString().c_str());
+		fileHandler->write(QString("@LocalPort <Write localport here>" + endl).toStdString().c_str());
+		fileHandler->write(QString("@ServerIP <Write server ip here>" + endl).toStdString().c_str());
+		fileHandler->write(QString("@ExternalPort " + QString::number(extPort) + endl).toStdString().c_str());
+		fileHandler->close();
+	}
+	else
+	{
+		QMessageBox::warning(this, "I/O error", "Cannot write client.config file!",
+							 QMessageBox::Ok, 0);
+	}
+	delete fileHandler;
+}
+
 void MainWindow::slot_serverMessenger(QString disp)
 {
+	QString endl = "\n\r";
+	#ifndef Q_WS_WIN
+	endl = "\n";
+	#endif
 	QTextEdit *text = centralWidget()->findChild<QTextEdit*>(QString("logArea"));
 	text->append(disp);
-	// TODO:
-	// Write to logfile here like
-	// pseudo: logfile->append(disp)
+	fileHandler =  new QFile("server.log");
+	if (fileHandler->open(QFile::WriteOnly | QFile::Append))
+	{
+		QString logString = QString(QDateTime::currentDateTime().toString("[dd.MM.yyyy hh:mm] ") +
+									disp + endl);
+		fileHandler->write(logString.toStdString().c_str());
+		fileHandler->close();
+	}
+	else
+	{
+		QMessageBox::warning(this, "Logging error", "Cannot write to logfile!",
+							 QMessageBox::Ok, 0);
+	}
+	delete fileHandler;
 }
 
 void MainWindow::slot_serverStarted(bool isStarted)
 {
-	if (isStarted)
+	isOnline = isStarted;
+	if (isOnline)
 	{
 		centralWidget()->findChild<QPushButton*>(QString("buttonRun"))->setDisabled(true);
 		centralWidget()->findChild<QLineEdit*>(QString("inputExtPort"))->setDisabled(true);
@@ -73,50 +134,35 @@ void MainWindow::slot_serverStarted(bool isStarted)
 
 void MainWindow::on_buttonRun_clicked()
 {
-    QRegExp tocheck("[^0-9]");
-    if (centralWidget()->findChild<QLineEdit*>(QString("inputExtPort"))->text().contains(tocheck) || centralWidget()->findChild<QLineEdit*>(QString("inputIntPort"))->text().contains(tocheck) ||
-            centralWidget()->findChild<QLineEdit*>(QString("inputExtPort"))->text().length()!=4 || centralWidget()->findChild<QLineEdit*>(QString("inputIntPort"))->text().length()!=4)
-    {
-        QMessageBox::critical(0, "Invalid number of port(s)", "Port can only be a whole four significant number", QMessageBox::Ok, 0);
-        centralWidget()->findChild<QLineEdit*>(QString("inputExtPort"))->clear();
-        centralWidget()->findChild<QLineEdit*>(QString("inputIntPort"))->clear();
-        return;
-    }
-	int extPort = centralWidget()->findChild<QLineEdit*>(QString("inputExtPort"))->text().toInt();
-	int intPort = centralWidget()->findChild<QLineEdit*>(QString("inputIntPort"))->text().toInt();
+	QRegExp inputChecker("[1-9]\\d{0,4}");
+	QLineEdit * inputExtPort = centralWidget()->findChild<QLineEdit*>(QString("inputExtPort"));
+	QLineEdit * inputIntPort = centralWidget()->findChild<QLineEdit*>(QString("inputIntPort"));
+	if (!(inputChecker.exactMatch(inputExtPort->text()) &&
+		  inputChecker.exactMatch(inputIntPort->text())))
+	{
+		QMessageBox::critical(0,
+							  "Invalid port(s) number",
+							  "Port can only be a number 1 - 99999",
+							  QMessageBox::Ok,
+							  0);
+		inputIntPort->clear();
+		inputExtPort->clear();
+		return;
+	}
+	extPort = inputExtPort->text().toInt();
+	intPort = inputIntPort->text().toInt();
+	writeConfig();
 	emit signal_startServer(extPort, intPort);
-
-	fileHandler = new QFile("server.conf");
-	fileHandler->open(QFile::WriteOnly | QFile::Truncate);
-	fileHandler->write(QString("#Server configuration file\n\r").toStdString().c_str());
-	fileHandler->write(QString("@LocalPort " +
-							  QString::number(intPort) +
-							  "\n\r").toStdString().c_str());
-	fileHandler->write(QString("@ExternalPort " +
-							   QString::number(extPort) +
-							   "\n\r").toStdString().c_str());
-	fileHandler->close();
-	delete fileHandler;
-	fileHandler = new QFile("client.conf");
-	fileHandler->open(QFile::WriteOnly | QFile::Truncate);
-	fileHandler->write(QString("#Client configuration file\n\r").toStdString().c_str());
-	fileHandler->write(QString("@LocalPort <Write localport here>\n\r").toStdString().c_str());
-	fileHandler->write(QString("@ServerIP <Write server ip here>\n\r").toStdString().c_str());
-	fileHandler->write(QString("@ExternalPort " +
-							   QString::number(extPort) +
-							   "\`n\r").toStdString().c_str());
-
-	fileHandler->close();
-	delete fileHandler;
 }
 
 void MainWindow::on_buttonStop_clicked()
 {
-	emit signal_stopServer();
+	if (isOnline)
+		emit signal_stopServer();
 }
 
 void MainWindow::on_buttonRestart_clicked()
 {
-	emit signal_stopServer();
+	on_buttonStop_clicked();
 	on_buttonRun_clicked();
 }
