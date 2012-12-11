@@ -26,6 +26,7 @@ private:
 	bool startServer();
 	void sendToClient(QTcpSocket* pSocket, QString& str);
 	bool messageEncrypt(QByteArray &data);
+	bool messageDecrypt(QByteArray &data);
 	bool isIPV4Address(QString address);
 public:
 	Server();

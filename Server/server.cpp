@@ -166,7 +166,8 @@ void Server::slot_readDatabase()
 	while (databaseClientSocket->bytesAvailable() > 0)
 	{
 		char * buffer = new char[1024];
-		bzero(buffer, 1024);
+		//bzero(buffer, 1024);
+		memset(buffer, 0, 1024);
 		databaseClientSocket->readLine(buffer, 1024);
 		if (firstDBLine)
 		{
@@ -204,6 +205,11 @@ void Server::slot_readDatabase()
 }
 
 bool Server::messageEncrypt(QByteArray &data)
+{
+	return false;
+}
+
+bool Server::messageDecrypt(QByteArray &data)
 {
 	return false;
 }

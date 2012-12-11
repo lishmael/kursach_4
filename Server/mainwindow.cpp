@@ -95,7 +95,7 @@ void MainWindow::slot_serverMessenger(QString disp)
 	QString endl = "\n\r";
 	#ifndef Q_WS_WIN
 	endl = "\n";
-	#endif
+#endif
 	QTextEdit *text = centralWidget()->findChild<QTextEdit*>(QString("logArea"));
 	text->append(disp);
 	fileHandler =  new QFile("server.log");

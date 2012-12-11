@@ -11,7 +11,7 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        server.cpp \
+	server.cpp \
     mainwindow.cpp
 
 HEADERS  += server.h \
@@ -19,3 +19,5 @@ HEADERS  += server.h \
 
 FORMS    += \
     mainwindow.ui
+
+QMAKE_CXXFLAGS += -lcryptopp
