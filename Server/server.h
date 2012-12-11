@@ -1,16 +1,13 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <QWidget>
 #include <QtNetwork/QtNetwork>
 #include <QTcpServer>
-#include <QTextEdit>
 #include <QTcpSocket>
-#include <QMap>
-#include <QList>
+#include <QWidget>
 #include <QMessageBox>
-#include <QVBoxLayout>
-#include <QLabel>
+#include <cryptopp/eccrypto.h>
+#include <string>
 
 class Server : public QWidget
 {
@@ -19,19 +16,26 @@ private:
 	QTcpServer* externalServer;
 	QTcpServer* localServer;
 	quint16 NextBlockSize;
-	int externalPort, localPort;
+	int externalPort;
+	int localPort;
 	QList<QTcpSocket*> socketsConnected;
+	bool databaseConnectionEstablished;
+	bool firstDBLine;
+	QTcpSocket* databaseClientSocket;
 
 	bool startServer();
 	void sendToClient(QTcpSocket* pSocket, QString& str);
+	bool messageEncrypt(QByteArray &data);
+	bool isIPV4Address(QString address);
 public:
-
 	Server();
-	//Server(int externalPort, QWidget *pwgt = 0);
 	~Server();
 public slots:
-	virtual void slotNewConnection();
-	void slotReadClient();
+	void slot_databaseConnectionAboutToClose();
+	void slot_newDatabaseConnection();
+	void slot_newConnection();
+	void slot_readClient();
+	void slot_readDatabase();
 	void slot_startServer(int externalPort, int localPort);
 	void slot_stopServer();
 signals:
