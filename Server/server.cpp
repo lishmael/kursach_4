@@ -21,7 +21,7 @@ bool Server::startServer()
 	if (!externalServer->listen(QHostAddress::LocalHost, externalPort))
 	{
 		externalServer->close();
-		emit signal_startServerError("Local server starting error: " +
+		emit signal_startServerError("External server starting error: " +
 									 externalServer->errorString());
 		return false;
 	}
@@ -39,7 +39,7 @@ bool Server::startServer()
 									 localServer->errorString());
 		return false;
 	}
-	emit signal_display(QString("Internal server is ready at ") +
+	emit signal_display(QString("Local server is ready at ") +
 						localServer->serverAddress().toString() + " : " +
 						QString::number(localServer->serverPort()));
 	return true;
@@ -52,8 +52,8 @@ void Server::slot_newConnection()
 	if (this->socketsConnected.indexOf(pClientSocket) == -1)
 	{
 		socketsConnected.push_back(pClientSocket);
+		connect(pClientSocket, SIGNAL(readyRead()), this, SLOT(slot_readCient()));
 		connect(pClientSocket, SIGNAL(disconnected()), pClientSocket, SLOT(deleteLater()));
-		connect(pClientSocket, SIGNAL(readyRead()), this, SLOT(slot_readClient()));
 		sResponse += "Connected";
 		QString buf = "New client connected: " +
 					  pClientSocket->peerAddress().toString();
@@ -63,38 +63,27 @@ void Server::slot_newConnection()
 	{
 		sResponse += "Error! Such client already exists!";
 	}
-	sendToClient(pClientSocket, sResponse);
+//	sendToClient(pClientSocket, sResponse);
+	send_to_client(pClientSocket, sResponse);
 }
 
-void Server::slot_readClient()
+void Server::slot_readCient()
 {
 	QTcpSocket* pClientSocket = (QTcpSocket*)sender();
-	QDataStream in(pClientSocket);
-	long totalDataRecived = 0;
-	QTime time;
-	QString buffer;
-	while (true)
+
+	QByteArray data;
+	while (pClientSocket->bytesAvailable() > 0)
 	{
-		if (!NextBlockSize)
-		{
-			if (pClientSocket->bytesAvailable() < sizeof(quint16))
-				break;
-			in >> NextBlockSize;
-			totalDataRecived += NextBlockSize;
-		}
-		if (pClientSocket->bytesAvailable() < NextBlockSize)
-			break;
-		QString sTmp;
-		in >> time >> sTmp;
-		buffer += sTmp;
-		NextBlockSize = 0;
-		sTmp = "Server Response: Recived " + sTmp;
-		sendToClient(pClientSocket, sTmp);
+		data.append(pClientSocket->readLine());
+		QString sTmp = "Server response: Recived";
+//		sendToClient(pClientSocket, sTmp);
+		send_to_client(pClientSocket, sTmp);
 	}
 
-	QString strMessage = time.toString() + " " + "Client has sent " +
-						 QString::number(totalDataRecived) +
-						 " bytes. Data is: " + buffer;
+	QString strMessage = "Client from " +
+						 pClientSocket->peerAddress().toString() + " has sent " +
+						 QString::number(data.count()) +
+						 " bytes. Data is: <" + QString(data) + ">";
 	emit signal_display(strMessage);
 }
 
@@ -121,22 +110,34 @@ void Server::slot_stopServer()
 	emit this->signal_display(QString("Server is down"));
 }
 
-void Server::sendToClient(QTcpSocket* pSocket, QString& str)
+//void Server::sendToClient(QTcpSocket* pSocket, QString& str)
+//{
+//	QByteArray arrBlock;
+//	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+//	out << quint16(0) << QTime::currentTime() << str;
+//	out.device()->seek(0);
+//	out << quint16(arrBlock.size() - sizeof(quint16));
+//	pSocket->write(arrBlock);
+//	QTime time;
+//	QString strMessage = time.currentTime().toString() +
+//						 " Server has sent to the " +
+//						 pSocket->peerAddress().toString() +
+//						 QString::number(arrBlock.size() - sizeof(quint16)) +
+//						 " bytes of data. Data is: <" + str + ">";
+//	emit signal_display(strMessage);
+//}
+
+void Server::send_to_client(QTcpSocket *pSocket, QString data)
 {
-	QByteArray arrBlock;
-	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out << quint16(0) << QTime::currentTime() << str;
-	out.device()->seek(0);
-	out << quint16(arrBlock.size() - sizeof(quint16));
-	pSocket->write(arrBlock);
-	QTime time;
-	QString strMessage = time.currentTime().toString() +
-						 " Server has sent to the " +
-						 pSocket->peerAddress().toString() + "\n" +
-						 QString::number(arrBlock.size() - sizeof(quint16)) +
-						 " bytes of data. Data is: " + str;
+	QByteArray bData = QByteArray(data.toStdString().c_str());
+	pSocket->write(bData);
+	QString strMessage = "Server has sent to the " +
+						 pSocket->peerAddress().toString() + " " +
+						 QString::number(bData.size()) +
+						 " bytes of data. Data is: <" + data + ">";
 	emit signal_display(strMessage);
 }
+
 
 void Server::slot_databaseConnectionAboutToClose()
 {
@@ -184,8 +185,9 @@ void Server::slot_readDatabase()
 			recivedData.append(buffer, QString(buffer).count());
 		}
 	}
-	emit signal_display(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz Recived: ") +
-						QString::number(recivedData.count()) + QString(" bytes of data"));
+	emit signal_display("Recived: " +
+						QString::number(recivedData.count()) +
+						QString(" bytes of data"));
 
 	messageEncrypt(recivedData);
 	QListIterator<QTcpSocket*> iter(socketsConnected);
@@ -194,10 +196,12 @@ void Server::slot_readDatabase()
 	while (iter.hasPrevious())
 	{
 		QTcpSocket * tmp = iter.previous();
-		if (tmp->peerAddress() == clientHost)
+		QHostAddress clientAddress = tmp->peerAddress();
+		if ( clientAddress == clientHost)
 		{
 			sTmp = QString(recivedData);
-			sendToClient(tmp, sTmp);
+//			sendToClient(tmp, sTmp);
+			send_to_client(tmp, sTmp);
 			break;
 		}
 	}

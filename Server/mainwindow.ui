@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>541</width>
-    <height>407</height>
+    <width>790</width>
+    <height>508</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,9 +20,9 @@
    <widget class="QPushButton" name="buttonRun">
     <property name="geometry">
      <rect>
-      <x>270</x>
+      <x>280</x>
       <y>10</y>
-      <width>71</width>
+      <width>141</width>
       <height>61</height>
      </rect>
     </property>
@@ -35,15 +35,15 @@
      <rect>
       <x>10</x>
       <y>90</y>
-      <width>521</width>
-      <height>291</height>
+      <width>771</width>
+      <height>411</height>
      </rect>
     </property>
    </widget>
    <widget class="QLineEdit" name="inputIntPort">
     <property name="geometry">
      <rect>
-      <x>160</x>
+      <x>170</x>
       <y>40</y>
       <width>81</width>
       <height>31</height>
@@ -59,7 +59,7 @@
    <widget class="QLineEdit" name="inputExtPort">
     <property name="geometry">
      <rect>
-      <x>160</x>
+      <x>170</x>
       <y>10</y>
       <width>81</width>
       <height>31</height>
@@ -78,9 +78,9 @@
    <widget class="QPushButton" name="buttonStop">
     <property name="geometry">
      <rect>
-      <x>350</x>
+      <x>460</x>
       <y>10</y>
-      <width>71</width>
+      <width>141</width>
       <height>61</height>
      </rect>
     </property>
@@ -91,9 +91,9 @@
    <widget class="QPushButton" name="buttonRestart">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>640</x>
       <y>10</y>
-      <width>101</width>
+      <width>141</width>
       <height>61</height>
      </rect>
     </property>
@@ -128,7 +128,6 @@
     </property>
    </widget>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>

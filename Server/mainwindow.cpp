@@ -92,17 +92,15 @@ void MainWindow::writeConfig()
 
 void MainWindow::slot_serverMessenger(QString disp)
 {
-	QString endl = "\n\r";
-	#ifndef Q_WS_WIN
-	endl = "\n";
-#endif
+
+	QString logString = QString(QDateTime::currentDateTime().toString("[dd.MM.yyyy hh:mm.ss] ") +
+								disp);
 	QTextEdit *text = centralWidget()->findChild<QTextEdit*>(QString("logArea"));
-	text->append(disp);
+	text->append(logString);
 	fileHandler =  new QFile("server.log");
 	if (fileHandler->open(QFile::WriteOnly | QFile::Append))
 	{
-		QString logString = QString(QDateTime::currentDateTime().toString("[dd.MM.yyyy hh:mm] ") +
-									disp + endl);
+		logString += "\n";
 		fileHandler->write(logString.toStdString().c_str());
 		fileHandler->close();
 	}

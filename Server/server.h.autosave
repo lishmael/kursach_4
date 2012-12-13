@@ -2,11 +2,13 @@
 #define SERVER_H
 
 #include <QtNetwork/QtNetwork>
+#include <QtNetwork>
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QWidget>
 #include <QMessageBox>
 #include <cryptopp/eccrypto.h>
+#include <QSsl>
 #include <string>
 
 class Server : public QWidget

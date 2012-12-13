@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core network
 
 TARGET = Client
 TEMPLATE = app

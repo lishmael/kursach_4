@@ -12,10 +12,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
 	server.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    ec_crypto.cpp
 
 HEADERS  += server.h \
-    mainwindow.h
+    mainwindow.h \
+    ec_crypto.h
 
 FORMS    += \
     mainwindow.ui
